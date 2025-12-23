@@ -1,0 +1,24 @@
+package postgres
+
+import (
+	"context"
+	"database/sql"
+	"time"
+)
+
+func Connect(ctx context.Context, dsn string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		//
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	if err := db.PingContext(ctx); err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
+}
