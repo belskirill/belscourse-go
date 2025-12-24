@@ -9,7 +9,7 @@ import (
 func Connect(ctx context.Context, dsn string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		//
+		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)

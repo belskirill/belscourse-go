@@ -1,5 +1,7 @@
 package user
 
+import "context"
+
 type UseCreatorSession interface {
-	CreateUser() error
+	CreateUser(ctx context.Context) error
 }

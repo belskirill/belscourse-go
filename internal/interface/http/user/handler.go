@@ -6,7 +6,7 @@ import (
 )
 
 func (h *UserHandler) CreateSession(w http.ResponseWriter, r *http.Request) error {
-	err := h.create.CreateUser()
+	err := h.create.CreateUser(r.Context())
 	if err != nil {
 		return err
 	}

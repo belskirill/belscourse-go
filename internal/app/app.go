@@ -30,7 +30,7 @@ func NewApp(ctx context.Context) (*App, error) {
 }
 
 func (a *App) BuilderHTTPServer() *http.Server {
-	return NewHTTPServer("8080", a.db)
+	return NewHTTPServer(":8080", a.db)
 }
 
 func (a *App) Close() {
