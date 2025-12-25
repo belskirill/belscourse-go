@@ -1,7 +1,9 @@
 package user
 
-import "context"
+import (
+	"context"
+)
 
 type CreateSessionRepo interface {
-	InsertValue(ctx context.Context) error
+	InsertValue(ctx context.Context, req User) error
 }

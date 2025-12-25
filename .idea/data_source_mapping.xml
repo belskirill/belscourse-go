@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/.idea/queries/Query.sql" value="3f550776-f386-46ad-8b23-16443125602f" />
     <file url="file://$PROJECT_DIR$/internal/infra/database/postgres/repositories/user/repository.go" value="3f550776-f386-46ad-8b23-16443125602f" />
     <file url="file://$PROJECT_DIR$/migrations/000001_create_users_table.down.sql" value="3f550776-f386-46ad-8b23-16443125602f" />
   </component>

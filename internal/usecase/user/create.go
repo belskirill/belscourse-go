@@ -24,21 +24,24 @@ func NewUseCaseCreateSession(
 	}
 }
 
-func (uc *UseCaseCreateSession) CreateUser(ctx context.Context) error {
+func (uc *UseCaseCreateSession) CreateUser(ctx context.Context, req user.CreateUserRequest) error {
 	if err := uc.transaction.Do(ctx, func(ctx context.Context) error {
-		return uc.repo.InsertValue(ctx)
+
+		hash, err := uc.domainService.HashService(req.Password, 12)
+		if err != nil {
+			return err
+		}
+
+		UserWithHash := user.User{
+			Username:     req.Username,
+			Email:        req.Email,
+			PasswordHash: hash,
+		}
+
+		return uc.repo.InsertValue(ctx, UserWithHash)
 	}); err != nil {
 		return err
 	}
 
 	return nil
-
-	//if err := uc.transaction.Do(ctx, func(ctx context.Context) error {
-	//	hash, err := uc.domainService.Hash()
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//
-	//})
 }

@@ -14,14 +14,14 @@ type userHandlers struct {
 	createSession *user3.UserHandler
 }
 
-func buildUserHandlers(db postgres.Executor, sqldb *sql.DB) *userHandlers {
+func buildUserHandlers(db *sql.DB) *userHandlers {
 	repo := user.NewRepository(db)
 
-	transaction := postgres.NewUnitOfWork(sqldb)
+	transaction := postgres.NewUnitOfWork(db)
 	CryptoPassword := crypto.NewHashCrypto()
-	ServicePasssword := user4.NewServicePasswordPolicy(CryptoPassword)
+	ServicePassword := user4.NewServicePasswordPolicy(CryptoPassword)
 
-	createSessionUC := user2.NewUseCaseCreateSession(repo, transaction, ServicePasssword)
+	createSessionUC := user2.NewUseCaseCreateSession(repo, transaction, ServicePassword)
 
 	return &userHandlers{
 		createSession: user3.NewHandler(createSessionUC),

@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -27,7 +29,7 @@ func main() {
 	server := app.BuilderHTTPServer()
 
 	go func() {
-		log.Println("🌐 HTTP server on :8080")
+		app.Logger.Info("HTTP server on :8080")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
@@ -39,7 +41,7 @@ func main() {
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Println("http shutdown error:", err)
+		app.Logger.Error("http shutdown error:", zap.Error(err))
 	}
 
 	app.Close()

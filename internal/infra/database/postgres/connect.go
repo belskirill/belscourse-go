@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 func Connect(ctx context.Context, dsn string) (*sql.DB, error) {
@@ -16,7 +18,9 @@ func Connect(ctx context.Context, dsn string) (*sql.DB, error) {
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
-		db.Close()
+		if err := db.Close(); err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 
