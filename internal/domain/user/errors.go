@@ -8,19 +8,23 @@ const (
 	ErrInvalidPassword   DomainErrorCode = "INVALID_PASSWORD"
 )
 
+var defaultMessages = map[DomainErrorCode]string{
+	ErrUserAlreadyExists: "user already exists",
+	ErrUserNotFound:      "user not found",
+	ErrInvalidPassword:   "invalid credentials",
+}
+
 type DomainError struct {
 	Code    DomainErrorCode
-	Fields  map[string]string
 	Message string
 	Err     error
 }
 
-func New(code DomainErrorCode, err error, fields map[string]string, message string) *DomainError {
+func New(code DomainErrorCode, err error) *DomainError {
 	return &DomainError{
 		Code:    code,
 		Err:     err,
-		Fields:  fields,
-		Message: message,
+		Message: defaultMessages[code],
 	}
 }
 

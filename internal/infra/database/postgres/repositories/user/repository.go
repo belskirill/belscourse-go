@@ -4,6 +4,7 @@ import (
 	"belscourrsego/internal/domain/user"
 	"belscourrsego/internal/infra/database/postgres"
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/lib/pq"
@@ -19,45 +20,46 @@ func NewRepository(db postgres.Executor) *Repository {
 	}
 }
 
-func (r *Repository) InsertValue(ctx context.Context, req user.User) error {
+func (r *Repository) InsertValue(ctx context.Context, req user.UserCreate) (user.UserBase, error) {
 	const query = `
 		INSERT INTO users (username, email, password_hash)
 		VALUES ($1, $2, $3)
+		RETURNING id, username, email
 `
+	var response user.UserBase
 
-	if _, err := r.db.ExecContext(ctx, query, req.Username, req.Email, req.PasswordHash); err != nil {
+	if err := r.db.QueryRowContext(ctx, query, req.Username, req.Email, req.PasswordHash).Scan(&response.ID, &response.Username, &response.Email); err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
 			if pqErr.Code == "23505" {
-				return user.New(
+				return user.UserBase{}, user.New(
 					user.ErrUserAlreadyExists,
 					err,
-					nil,
-					"Такой пользователь уже существует!",
 				)
 			}
 		}
+
+		return user.UserBase{}, err
 	}
-	return nil
 
-	//if tx, ok := postgres.TxFromContext(ctx); ok {
-	//	_, err := tx.ExecContext(ctx, query, "test1", "test2", "test3")
-	//	if err != nil {
-	//		return err
-	//	}
-	//	return nil
-	//}
-
+	return response, nil
 }
 
-//func (r *Repository) SelectValue(ctx context.Context, value string) (*domain.User, error) {
-//	const query = `SELECT * FROM users WHERE email = $1 or username = $1`
-//	row := r.db.QueryRow(query, value)
-//
-//	var user domain.User
-//	if err := row.Scan(&user); err != nil {
-//		return nil, err
-//	}
-//
-//	return &user, nil
-//}
+func (r *Repository) GetUserByEmailOrUsername(ctx context.Context, usr user.UserWithPassword) (user.UserWithPassword, error) {
+	const query = `
+		SELECT id, username, email, password_hash
+		FROM users
+		WHERE username = $1 or email = $2
+`
+	var userPass user.UserWithPassword
+
+	if err := r.db.QueryRowContext(ctx, query, usr.Username, usr.Email).Scan(&userPass.ID, &userPass.Username, &userPass.Email, &userPass.HashPassword); err != nil {
+		if err == sql.ErrNoRows {
+			return user.UserWithPassword{}, user.New(user.ErrUserNotFound, err)
+		}
+
+		return user.UserWithPassword{}, err
+	}
+
+	return userPass, nil
+}

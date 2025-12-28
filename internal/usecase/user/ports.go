@@ -5,6 +5,10 @@ import (
 	"context"
 )
 
-type UseCreatorSession interface {
-	CreateUser(ctx context.Context, req user.CreateUserRequest) error
+type UseCreator interface {
+	CreateUser(ctx context.Context, req user.UserCreate) (user.UserBase, error)
+}
+
+type CreateUserSession interface {
+	CreateSession(ctx context.Context, req user.UserWithPassword) (string, error)
 }

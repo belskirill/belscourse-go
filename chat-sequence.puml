@@ -1,0 +1,31 @@
+@startuml
+actor Clinet
+participant ChatGW
+participant MessageService
+participant Kafka
+participant PushService
+
+== Connect ==
+
+User -> ChatGW : open WebSocket(chat_id)
+ChatGW -> MessageService : check access
+MessageService --> ChatGW : allowed
+
+== Send message ==
+
+User -> ChatGW : send message
+ChatGW -> MessageService : SaveMessage(chat_id, text)
+MessageService -> Kafka : ChatMessageEvent
+
+== Fan-out ==
+
+Kafka -> ChatGW : ChatMessageEvent
+Kafka -> PushService : ChatMessageEvent
+
+alt user online
+  ChatGW -> User : WS message
+else user offline
+  PushService -> User : Push notification
+end
+
+@enduml

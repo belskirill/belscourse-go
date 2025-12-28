@@ -10,7 +10,7 @@ func ResponseJSON(w http.ResponseWriter, code int, data any) error {
 	w.WriteHeader(code)
 
 	if data == nil {
-		return nil
+		data = map[string]string{"status": "ok"}
 	}
 
 	return json.NewEncoder(w).Encode(data)

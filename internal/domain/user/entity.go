@@ -8,20 +8,23 @@ const (
 	OwnerRole Role = "owner"
 )
 
-type User struct {
+type UserCreate struct {
 	Username     string
 	Email        string
 	PasswordHash string
+	Password     string
 }
 
-type CreateUserRequest struct {
-	Username string `json:"username" validate:"required,min=3"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+type UserBase struct {
+	ID       int64
+	Username string
+	Email    string
 }
 
-type UserResponse struct {
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+type UserWithPassword struct {
+	ID           int64
+	Username     string
+	Email        string
+	Password     string
+	HashPassword string
 }

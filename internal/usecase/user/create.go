@@ -1,47 +1,49 @@
 package user
 
 import (
-	"belscourrsego/internal/domain/common"
 	"belscourrsego/internal/domain/user"
+	"belscourrsego/internal/infra/database/postgres"
 	"context"
 )
 
-type UseCaseCreateSession struct {
-	repo          user.CreateSessionRepo
-	transaction   common.UnitOfWorker
+type UseCaseCreate struct {
+	repo          user.CreateRepo
+	uow           *postgres.UnitOfWork
 	domainService user.PasswordService
 }
 
-func NewUseCaseCreateSession(
-	repo user.CreateSessionRepo,
-	transaction common.UnitOfWorker,
+func NewUseCaseCreate(
+	repo user.CreateRepo,
+	uow *postgres.UnitOfWork,
 	domainService user.PasswordService,
-) *UseCaseCreateSession {
-	return &UseCaseCreateSession{
+) *UseCaseCreate {
+	return &UseCaseCreate{
 		repo:          repo,
-		transaction:   transaction,
+		uow:           uow,
 		domainService: domainService,
 	}
 }
 
-func (uc *UseCaseCreateSession) CreateUser(ctx context.Context, req user.CreateUserRequest) error {
-	if err := uc.transaction.Do(ctx, func(ctx context.Context) error {
-
+func (uc *UseCaseCreate) CreateUser(ctx context.Context, req user.UserCreate) (user.UserBase, error) {
+	res, err := postgres.Do(ctx, uc.uow, func(ctx context.Context) (user.UserBase, error) {
 		hash, err := uc.domainService.HashService(req.Password, 12)
 		if err != nil {
-			return err
+			return user.UserBase{}, err
 		}
 
-		UserWithHash := user.User{
-			Username:     req.Username,
-			Email:        req.Email,
-			PasswordHash: hash,
+		req.PasswordHash = hash
+
+		res, err := uc.repo.InsertValue(ctx, req)
+		if err != nil {
+			return user.UserBase{}, err
 		}
 
-		return uc.repo.InsertValue(ctx, UserWithHash)
-	}); err != nil {
-		return err
+		return res, nil
+	})
+
+	if err != nil {
+		return user.UserBase{}, err
 	}
 
-	return nil
+	return res, nil
 }

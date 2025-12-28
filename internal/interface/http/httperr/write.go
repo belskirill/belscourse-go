@@ -13,6 +13,12 @@ func StatusFromCode(code Code) int {
 		return http.StatusInternalServerError
 	case CodeConflict:
 		return http.StatusConflict
+	case MethodNotAllowed:
+		return http.StatusMethodNotAllowed
+	case CodeInvalidInput:
+		return http.StatusBadRequest
+	case CodeUnauthenticated:
+		return http.StatusUnauthorized
 	default:
 		return http.StatusInternalServerError
 	}

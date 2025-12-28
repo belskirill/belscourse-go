@@ -13,10 +13,14 @@ func NewUnitOfWork(db *sql.DB) *UnitOfWork {
 	return &UnitOfWork{db: db}
 }
 
-func (u *UnitOfWork) Do(ctx context.Context, fn func(ctx context.Context) error) error {
-	tx, err := u.db.BeginTx(ctx, nil)
+func Do[T any](
+	ctx context.Context,
+	uow *UnitOfWork,
+	fn func(ctx context.Context) (T, error),
+) (result T, err error) {
+	tx, err := uow.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return result, err
 	}
 
 	defer func() {
@@ -24,22 +28,23 @@ func (u *UnitOfWork) Do(ctx context.Context, fn func(ctx context.Context) error)
 			_ = tx.Rollback()
 			panic(p)
 		}
+
 		if err != nil {
 			_ = tx.Rollback()
-
 		}
 	}()
 
-	NewCtx := context.WithValue(ctx, SqlTxKey{}, tx)
+	ctxWithTx := context.WithValue(ctx, SqlTxKey{}, tx)
 
-	if err := fn(NewCtx); err != nil {
-		return err
+	result, err = fn(ctxWithTx)
+
+	if err != nil {
+		return result, err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
+	if err = tx.Commit(); err != nil {
+		return result, err
 	}
 
-	return nil
-
+	return result, nil
 }

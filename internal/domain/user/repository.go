@@ -4,6 +4,9 @@ import (
 	"context"
 )
 
+type CreateRepo interface {
+	InsertValue(ctx context.Context, req UserCreate) (UserBase, error)
+}
 type CreateSessionRepo interface {
-	InsertValue(ctx context.Context, req User) error
+	GetUserByEmailOrUsername(ctx context.Context, usr UserWithPassword) (UserWithPassword, error)
 }

@@ -2,13 +2,26 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/caarlos0/env/v10"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
 type Config struct {
-	DB DBConfig
+	DB  DBConfig
+	JWT JwtConfig
+	APP AppConfig
+}
+
+type AppConfig struct {
+	MODE string `env:"MODE,required"`
+}
+
+type JwtConfig struct {
+	JWTSecret string        `env:"JWT_SECRET,required"`
+	JWTExpire time.Duration `env:"JWT_ACCESS_TTL,required"`
 }
 
 type DBConfig struct {
@@ -25,12 +38,15 @@ func (c DBConfig) DSN() string {
 		c.User, c.Password, c.Host, c.Port, c.Name, c.SSLMode)
 }
 
-func Load() (Config, error) {
+func Load(logger *zap.Logger) (Config, error) {
 	_ = godotenv.Load()
 
 	var cfg Config
 	if err := env.Parse(&cfg); err != nil {
+		logger.Warn("failed to parse config", zap.Error(err))
 		return Config{}, err
 	}
+
+	logger.Info("loaded config")
 	return cfg, nil
 }
