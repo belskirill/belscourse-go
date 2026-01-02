@@ -13,7 +13,7 @@ import (
 func NewHTTPServer(addr string, db *sql.DB, logger *zap.Logger, validate *validator.Validate, cfg config.Config) *http.Server {
 	root := http.NewServeMux()
 
-	router := buildUserHandlers(db, validate, cfg)
+	router := buildUserHandlers(db, validate, cfg, logger)
 	userV1 := http.NewServeMux()
 	authV1 := http.NewServeMux()
 
@@ -21,6 +21,7 @@ func NewHTTPServer(addr string, db *sql.DB, logger *zap.Logger, validate *valida
 	authV1.Handle("/create_session", middleware.CheckMethod(http.MethodPost, logger)(middleware.Wrap(router.user.CreateSession, logger)))
 
 	userV1.Handle("/edit", middleware.CheckMethod(http.MethodPost, logger)(middleware.Wrap(router.user.EditProfile, logger)))
+	userV1.Handle("/send_email", middleware.CheckMethod(http.MethodPost, logger)(middleware.Wrap(router.user.SendEmail, logger)))
 
 	root.Handle("/user/v1/auth/", http.StripPrefix("/user/v1/auth", authV1))
 	root.Handle("/user/v1/", middleware.GetUserID(router.jwtService, logger)(http.StripPrefix("/user/v1", userV1)))

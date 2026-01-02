@@ -63,3 +63,20 @@ func (r *Repository) GetUserByEmailOrUsername(ctx context.Context, usr user.User
 
 	return userPass, nil
 }
+
+func (r *Repository) GetUserByID(ctx context.Context, id int64) (user.UserBase, error) {
+	const query = `
+SELECT email
+FROM users
+WHERE id = $1`
+	var response user.UserBase
+	if err := r.db.QueryRowContext(ctx, query, id).Scan(&response.Email); err != nil {
+		if err == sql.ErrNoRows {
+			return user.UserBase{}, user.New(user.ErrUserNotFound, err)
+		}
+
+		return user.UserBase{}, err
+	}
+
+	return response, nil
+}

@@ -10,3 +10,7 @@ type CreateRepo interface {
 type CreateSessionRepo interface {
 	GetUserByEmailOrUsername(ctx context.Context, usr UserWithPassword) (UserWithPassword, error)
 }
+
+type GetUserByIDs interface {
+	GetUserByID(ctx context.Context, id int64) (UserBase, error)
+}

@@ -12,3 +12,10 @@ type UseCreator interface {
 type CreateUserSession interface {
 	CreateSession(ctx context.Context, req user.UserWithPassword) (string, error)
 }
+
+type SendEmailerCode interface {
+	SendEmailCode(ctx context.Context, userID int64) error
+}
+
+type WebHook interface {
+}

@@ -7,15 +7,19 @@ import (
 )
 
 type UserHandler struct {
-	create   user.UseCreator
-	login    user.CreateUserSession
-	validate *validator.Validate
+	create    user.UseCreator
+	login     user.CreateUserSession
+	validate  *validator.Validate
+	sendEmail user.SendEmailerCode
+	webhook   user.WebHook
 }
 
-func NewHandler(usecase user.UseCreator, login user.CreateUserSession, validate *validator.Validate) *UserHandler {
+func NewHandler(usecase user.UseCreator, login user.CreateUserSession, validate *validator.Validate, sendEmail user.SendEmailerCode, wb user.WebHook) *UserHandler {
 	return &UserHandler{
-		create:   usecase,
-		login:    login,
-		validate: validate,
+		create:    usecase,
+		login:     login,
+		validate:  validate,
+		sendEmail: sendEmail,
+		webhook:   wb,
 	}
 }

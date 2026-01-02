@@ -10,9 +10,18 @@ import (
 )
 
 type Config struct {
-	DB  DBConfig
-	JWT JwtConfig
-	APP AppConfig
+	DB    DBConfig
+	JWT   JwtConfig
+	APP   AppConfig
+	Email EmailConfig
+}
+
+type EmailConfig struct {
+	Host string `env:"EMAIL_HOST"`
+	Port int    `env:"EMAIL_PORT"`
+	User string `env:"EMAIL_USER"`
+	Pass string `env:"EMAIL_PASS"`
+	From string `env:"EMAIL_FROM"`
 }
 
 type AppConfig struct {
@@ -48,5 +57,6 @@ func Load(logger *zap.Logger) (Config, error) {
 	}
 
 	logger.Info("loaded config")
+	logger.Info("config", zap.Any("cfg", cfg.Email))
 	return cfg, nil
 }
